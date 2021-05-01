@@ -11,8 +11,8 @@ dataset = st.beta_container()
 features = st.beta_container()
 model_training = st.beta_container()
 
-@st.cache(suppress_st_warning=True)
-def get_data1(filename):
+@st.cache
+def get_data(filename):
     HR_DATA = pd.read_csv(filename)
     return HR_DATA
 
@@ -21,15 +21,17 @@ def get_data2(filename):
     HR_DATA = pd.read_csv(filename)
     return HR_DATA
 
-#@st.cache
 def get_data3(filename):
     HR_DATA = pd.read_csv(filename)
     return HR_DATA
 
-@st.cache
-def get_data4(filename):
-    HR_DATA = pd.read_csv(filename)
-    return HR_DATA
+
+df_ED = get_data('data/Employee_Designation.csv')
+df_ESD = get_data2('data/Employee_Skills_Datset.csv')
+df_FED = get_data3('data/Final_Employees_Data.csv') 
+del df_FED['Ename']
+df_merged = pd.merge(df_ED,df_ESD,how='left',left_on=['Eid'],right_on=['Eid'])
+skills_dataset = pd.merge(df_merged,df_FED,how='left',left_on=['Eid'],right_on=['Eid'])
 
 with header:
     st.title('Content-based Recommender System For Skills Dataset')
@@ -45,40 +47,34 @@ with dataset:
     st.text("")
     st.text('I got this dataset from Kaggle: https://www.kaggle.com/granjithkumar/it-employees-data-for-project-allocation?select=Employee_Designation.csv')
 
-    Employee_Designation = get_data1('data/Employee_Designation.csv')
-    Employee_Skills_Datset = get_data2('data/Employee_Skills_Datset.csv')
-    Final_Employees_Data = get_data3('data/Final_Employees_Data.csv')
-    del Final_Employees_Data['Ename']
-    Employee_data = pd.merge(Employee_Designation,Employee_Skills_Datset,how='left',left_on=['Eid'],right_on=['Eid'])
-    Employee_data = pd.merge(Employee_data,Final_Employees_Data,how='left',left_on=['Eid'],right_on=['Eid'])
-    st.write(Employee_data.head())
+    st.write(skills_dataset.head())
 
     st.subheader('Designation distribution')
-    state_disribution = pd.DataFrame(Employee_data['Designation'].value_counts())
+    state_disribution = pd.DataFrame(skills_dataset['Designation'].value_counts())
     st.bar_chart(state_disribution)
 
     st.subheader('Area_of_Interest_1 distribution')
-    state_disribution = pd.DataFrame(Employee_data['Area_of_Interest_1'].value_counts())
+    state_disribution = pd.DataFrame(skills_dataset['Area_of_Interest_1'].value_counts())
     st.bar_chart(state_disribution)
 
     st.subheader('Area_of_Interest_2 distribution')
-    state_disribution = pd.DataFrame(Employee_data['Area_of_Interest_2'].value_counts())
+    state_disribution = pd.DataFrame(skills_dataset['Area_of_Interest_2'].value_counts())
     st.bar_chart(state_disribution)
 
     st.subheader('Area_of_Interest_3 distribution')
-    state_disribution = pd.DataFrame(Employee_data['Area_of_Interest_3'].value_counts())
+    state_disribution = pd.DataFrame(skills_dataset['Area_of_Interest_3'].value_counts())
     st.bar_chart(state_disribution)
 
     st.subheader('Language1 distribution')
-    state_disribution = pd.DataFrame(Employee_data['Language1'].value_counts())
+    state_disribution = pd.DataFrame(skills_dataset['Language1'].value_counts())
     st.bar_chart(state_disribution)
 
     st.subheader('Language2 distribution')
-    state_disribution = pd.DataFrame(Employee_data['Language2'].value_counts())
+    state_disribution = pd.DataFrame(skills_dataset['Language2'].value_counts())
     st.bar_chart(state_disribution)
 
     st.subheader('Language3 distribution')
-    state_disribution = pd.DataFrame(Employee_data['Language3'].value_counts())
+    state_disribution = pd.DataFrame(skills_dataset['Language3'].value_counts())
     st.bar_chart(state_disribution)
 
 with features:
@@ -92,17 +88,11 @@ with model_training:
 
     sel_col, disp_col = st.beta_columns(2)
 
-    input_name = sel_col.selectbox('Select any name from dataset', (Employee_Designation['Ename']))
-    df = get_data4('data/Employee_Designation.csv')
+    input_name = sel_col.selectbox('Select any name from dataset', (skills_dataset['Ename']))
     sel_col.subheader('Name Details')
-    sel_col.write(df.loc[df['Ename'] == input_name])
+    sel_col.write(skills_dataset.loc[skills_dataset['Ename'] == input_name])
 
-    df_ED = pd.read_csv ('data/Employee_Designation.csv')
-    df_ESD = pd.read_csv ('data/Employee_Skills_Datset.csv')
-    df_FED = pd.read_csv ('data/Final_Employees_Data.csv') 
-    del df_FED['Ename']
-    df_merged = pd.merge(df_ED,df_ESD,how='left',left_on=['Eid'],right_on=['Eid'])
-    df = pd.merge(df_merged,df_FED,how='left',left_on=['Eid'],right_on=['Eid'])
+    df = skills_dataset.copy()
     df = df[df['Area_of_Interest_1'].notna()]
     df = df[df['Area_of_Interest_2'].notna()]
     df = df[df['Area_of_Interest_3'].notna()]
