@@ -86,11 +86,28 @@ with model_training:
     st.header('Training')
     st.text('Here you can get recommendation for any individual')
 
+    # Insert record sample
+    uploaded_file = st.file_uploader("Choose a XLSX file", type="xlsx")
+
+    if uploaded_file:
+        sample_df = pd.read_excel(uploaded_file)
+
+        st.dataframe(sample_df)
+
+
     sel_col, disp_col = st.beta_columns(2)
 
-    input_name = sel_col.selectbox('Select any name from dataset', (skills_dataset['Ename']))
+
+    
+    input_name = sel_col.text_input("Input Name from Dataset here", 'Simon Chapman')
     sel_col.subheader('Name Details')
+    if 'sample_df' in locals():
+        skills_dataset = skills_dataset.append(sample_df)
+    else:
+        pass
     sel_col.write(skills_dataset.loc[skills_dataset['Ename'] == input_name])
+
+    
 
     df = skills_dataset.copy()
     df = df[df['Area_of_Interest_1'].notna()]
